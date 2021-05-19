@@ -5,7 +5,7 @@ stages:
   - test
   - coverage
   - docker
-  # - deploy
+  - deploy
 build:
   stage: build
   script:
@@ -50,5 +50,18 @@ docker:
     - docker push "$CI_REGISTRY_IMAGE":"$CI_PIPELINE_IID"
     - docker tag "$CI_REGISTRY_IMAGE":"$CI_PIPELINE_IID" "$CI_REGISTRY_IMAGE":"latest"
     - docker push "$CI_REGISTRY_IMAGE":"latest"
+    -
+deploy:
+  stage: deploy
+  image: registry.gitlab.com/galv-vmw-apr-2021/capstone/base-aws-eks-image:latest
+  before_script:
+    - export IMAGE="$CI_REGISTRY_IMAGE":"$CI_PIPELINE_IID"
+    - aws configure set region us-west-2
+    - aws configure set output json
+    - aws eks update-kubeconfig --name "$CLUSTER_NAME"
+    - aws sts get-caller-identity
 
+  script:
+    - envsubst < k8s-deploy.yaml | kubectl apply -f -
+    - kubectl apply -f k8s-service.yaml
 
