@@ -37,4 +37,4 @@ spec:
                   name: autos-siyun-mysql-secret
                   key: db_pwd
       imagePullSecrets: # Be sure the token name matches what you created on K8s
-        - name: k8s-token
+        - name: autos-siyun-deploy-token
